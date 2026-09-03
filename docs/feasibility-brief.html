@@ -1,0 +1,1007 @@
+<title>MyJobSearch app — Feasibility Brief</title>
+<meta name="description" content="Feasibility study and architecture brief for MyJobSearch app: what's buildable, what Seek and LinkedIn actually allow, and how to scope it as a portfolio project.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper: #eceff3;
+    --surface: #fbfcfd;
+    --surface-2: #f3f6f9;
+    --ink: #17212e;
+    --ink-soft: #55636f;
+    --ink-faint: #8894a1;
+    --rule: #d3dbe3;
+    --rule-strong: #b8c3cd;
+    --accent: #1b4965;
+    --accent-bright: #2c7fae;
+    --accent-wash: #e3edf3;
+    --signal: #bd4b26;
+    --signal-wash: #f6e8e0;
+    --ok: #2f7d4f;
+    --warn: #937017;
+    --block: #b23b3b;
+    --grid: rgba(27, 73, 101, 0.07);
+    --shadow: 0 1px 2px rgba(20, 32, 46, 0.06), 0 10px 30px -16px rgba(20, 32, 46, 0.16);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e141c;
+      --surface: #151d27;
+      --surface-2: #1b2531;
+      --ink: #e4eaf1;
+      --ink-soft: #9aa7b6;
+      --ink-faint: #6b7887;
+      --rule: #2a3644;
+      --rule-strong: #3b4a59;
+      --accent: #6fb0d4;
+      --accent-bright: #8cc9e8;
+      --accent-wash: #172b38;
+      --signal: #e08a60;
+      --signal-wash: #2c1c14;
+      --ok: #5cb485;
+      --warn: #c9a250;
+      --block: #d97a7a;
+      --grid: rgba(111, 176, 212, 0.06);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -16px rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0e141c;
+    --surface: #151d27;
+    --surface-2: #1b2531;
+    --ink: #e4eaf1;
+    --ink-soft: #9aa7b6;
+    --ink-faint: #6b7887;
+    --rule: #2a3644;
+    --rule-strong: #3b4a59;
+    --accent: #6fb0d4;
+    --accent-bright: #8cc9e8;
+    --accent-wash: #172b38;
+    --signal: #e08a60;
+    --signal-wash: #2c1c14;
+    --ok: #5cb485;
+    --warn: #c9a250;
+    --block: #d97a7a;
+    --grid: rgba(111, 176, 212, 0.06);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -16px rgba(0, 0, 0, 0.55);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  .measure { max-width: 720px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    position: relative;
+    margin: 0 -24px;
+    padding: 60px 24px 40px;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 30px 30px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), transparent 78%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), transparent 78%);
+    pointer-events: none;
+  }
+  .masthead > * { position: relative; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: "Bricolage Grotesque", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 3.9rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+  h1 .lower { color: var(--ink-soft); }
+
+  .standfirst {
+    font-size: 1.12rem;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin: 0 0 30px;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  .theme-toggle {
+    position: absolute;
+    top: 22px;
+    right: 24px;
+    z-index: 2;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 6px 13px;
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--rule-strong); color: var(--ink); }
+
+  /* ---------- Verdict ---------- */
+  .verdict {
+    margin-top: 40px;
+    padding: 28px 30px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    box-shadow: var(--shadow);
+  }
+  .verdict h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin: 0 0 12px;
+  }
+  .verdict p { margin: 0 0 12px; }
+  .verdict p:last-child { margin-bottom: 0; }
+  .verdict strong { font-weight: 600; }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 64px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    margin-bottom: 26px;
+  }
+  .sec-num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .sec-head h2 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 600;
+    font-size: 1.16rem;
+    letter-spacing: -0.01em;
+    margin: 34px 0 10px;
+  }
+
+  p { margin: 0 0 16px; }
+  a { color: var(--accent-bright); text-underline-offset: 2px; }
+
+  strong { font-weight: 600; }
+
+  ul.clean { margin: 0 0 16px; padding-left: 0; list-style: none; }
+  ul.clean li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 10px;
+  }
+  ul.clean li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.66em;
+    width: 6px;
+    height: 6px;
+    background: var(--accent-bright);
+  }
+
+  /* ---------- Feature cards ---------- */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .feature {
+    background: var(--surface);
+    padding: 22px 22px 24px;
+  }
+  .feature .ix {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .feature h3 { margin: 6px 0 12px; font-size: 1.05rem; }
+  .feature p { font-size: 0.93rem; color: var(--ink-soft); margin: 12px 0 0; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 4px 10px 4px 8px;
+    border: 1px solid currentColor;
+  }
+  .pill .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .pill--ok { color: var(--ok); }
+  .pill--ok .dot { background: var(--ok); }
+  .pill--warn { color: var(--warn); }
+  .pill--warn .dot { background: linear-gradient(90deg, var(--warn) 0 50%, transparent 50% 100%); border: 1.5px solid var(--warn); }
+  .pill--block { color: var(--block); }
+  .pill--block .dot { background: transparent; border: 2px solid var(--block); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    margin: 20px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 620px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--surface-2); }
+  td.mono, td .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem;
+  }
+  .tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tag--ok { color: var(--ok); }
+  .tag--warn { color: var(--warn); }
+  .tag--block { color: var(--block); }
+
+  /* ---------- Crux callout ---------- */
+  .crux {
+    margin: 26px 0;
+    padding: 24px 26px;
+    background: var(--signal-wash);
+    border: 1px solid var(--signal);
+    border-left: 3px solid var(--signal);
+  }
+  .crux .lbl {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--signal);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+  .crux p:last-child { margin-bottom: 0; }
+
+  /* ---------- Diagram ---------- */
+  .diagram {
+    margin: 24px 0 8px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 640px; margin: 0 auto; }
+  .di-node { fill: var(--surface-2); stroke: var(--rule-strong); stroke-width: 1; }
+  .di-node--accent { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 1.2; }
+  .di-lane { fill: none; stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 4; }
+  .di-title {
+    fill: var(--ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .di-sub {
+    fill: var(--ink-soft);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+  }
+  .di-lanelabel {
+    fill: var(--ink-faint);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .di-flow { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; }
+
+  /* ---------- Phase columns ---------- */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 20px 20px 22px;
+  }
+  .phase .ph-tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+  }
+  .phase h3 { margin: 6px 0 4px; font-size: 1.05rem; }
+  .phase .ph-when { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-faint); }
+  .phase ul { margin: 14px 0 0; padding-left: 0; list-style: none; font-size: 0.9rem; }
+  .phase li { position: relative; padding-left: 20px; margin-bottom: 9px; color: var(--ink-soft); }
+  .phase li::before {
+    content: "";
+    position: absolute; left: 0; top: 0.55em;
+    width: 8px; height: 8px;
+    border: 1.5px solid var(--accent-bright);
+  }
+  .phase--mvp li::before { background: var(--accent-bright); }
+
+  /* ---------- Pipeline strip ---------- */
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 20px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+  }
+  .pipeline span {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    padding: 5px 11px;
+    color: var(--ink-soft);
+  }
+  .pipeline span.term { color: var(--block); border-color: var(--block); }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+  }
+  footer h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 12px;
+  }
+  footer ul { margin: 0; padding-left: 18px; }
+  footer li { margin-bottom: 6px; }
+  .disclaimer { margin-top: 20px; font-size: 0.8rem; color: var(--ink-faint); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a, .theme-toggle { transition: color 0.15s ease, border-color 0.15s ease; }
+  }
+
+  @media (max-width: 560px) {
+    .page { padding: 0 16px 72px; }
+    .masthead { margin: 0 -16px; padding: 52px 16px 34px; }
+    .theme-toggle { right: 16px; }
+  }
+
+  @media print {
+    .theme-toggle { display: none; }
+    body { background: #fff; color: #000; }
+    .masthead::before { display: none; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle colour theme">Theme</button>
+    <p class="kicker">Feasibility study &amp; architecture brief</p>
+    <h1>MyJobSearch app<br><span class="lower">can it actually be built?</span></h1>
+    <p class="standfirst">
+      A job-hunt copilot that finds roles by keyword, tracks every application through the
+      hiring funnel, and drafts a cover letter matched to each job description and your CV.
+      This brief works out which parts are real, where Seek and LinkedIn get in the way,
+      and how to scope it so it stands up as a portfolio project.
+    </p>
+    <div class="meta">
+      <span>Project&nbsp;&nbsp;<b>MyJobSearch app</b></span>
+      <span>Type&nbsp;&nbsp;<b>Portfolio / learning</b></span>
+      <span>Date&nbsp;&nbsp;<b>2026-09-03</b></span>
+      <span>Status&nbsp;&nbsp;<b>Scoping</b></span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <h2>The verdict</h2>
+    <p>
+      <strong>Build it.</strong> Two of the three features — application tracking and AI
+      cover-letter generation — have no meaningful blockers. The third, discovering roles
+      by keyword, works cleanly through job-aggregator APIs but <strong>not</strong> through
+      Seek or LinkedIn directly: neither offers a job-search API to individual developers,
+      and automating around that sits against their terms of service.
+    </p>
+    <p>
+      The fix is a <strong>source-agnostic ingestion layer</strong> plus a
+      <strong>user-initiated browser capture</strong> for the two sites that dominate the
+      Australian market. Scoped that way it is a 3&ndash;6 weekend build that demonstrates
+      retrieval-augmented generation, semantic matching, resume parsing, a real evaluation
+      harness, and &mdash; a genuine interview talking point &mdash; a deliberate,
+      defensible data-sourcing decision.
+    </p>
+  </div>
+
+  <!-- 01 -->
+  <section id="scope">
+    <div class="sec-head"><span class="sec-num">&sect;01</span><h2>What you asked for</h2></div>
+    <div class="measure">
+      <p>Three user stories, in your words, restated as scope:</p>
+      <ul class="clean">
+        <li><strong>Discover.</strong> &ldquo;When I enter keywords, find matching jobs from Seek and LinkedIn.&rdquo;</li>
+        <li><strong>Track.</strong> &ldquo;Keep a record of every application I can update &mdash; when I applied, and how far I got in each company's hiring process.&rdquo;</li>
+        <li><strong>Tailor.</strong> &ldquo;For a job I want, read its description, match it against my CV, and generate a cover letter that reflects the fit.&rdquo;</li>
+      </ul>
+      <p>
+        The rest of this brief takes each one, rates how feasible it is, and then deals with
+        the one hard constraint that cuts across all three: where the job data comes from.
+      </p>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section id="feasibility">
+    <div class="sec-head"><span class="sec-num">&sect;02</span><h2>Feasibility at a glance</h2></div>
+    <div class="features">
+      <div class="feature">
+        <span class="ix">Feature 01</span>
+        <h3>Keyword job discovery</h3>
+        <span class="pill pill--warn"><span class="dot"></span>Partial</span>
+        <p>
+          Aggregator APIs (Adzuna, Jooble) give real keyword + location search with
+          Australian coverage and free tiers. Per-company boards (Greenhouse, Lever,
+          Workable) are public and structured. Seek and LinkedIn specifically have
+          <em>no</em> consumer search API &mdash; those are covered by browser capture
+          instead (&sect;03).
+        </p>
+      </div>
+      <div class="feature">
+        <span class="ix">Feature 02</span>
+        <h3>Application tracker</h3>
+        <span class="pill pill--ok"><span class="dot"></span>Feasible</span>
+        <p>
+          Plain CRUD over a status pipeline, per-role notes, reminders, a timeline, and a
+          funnel dashboard (response rate, time-to-first-reply, stage conversion). Optional
+          AI layer: read-only Gmail parsing that suggests status changes from recruiter
+          email.
+        </p>
+      </div>
+      <div class="feature">
+        <span class="ix">Feature 03</span>
+        <h3>Cover-letter generation</h3>
+        <span class="pill pill--ok"><span class="dot"></span>Feasible</span>
+        <p>
+          The centrepiece. Parse the CV, embed it, semantically match its evidence against
+          the job description, then have an LLM produce a match score, a gap analysis, and a
+          grounded draft. Guardrail: the model may only assert skills present in the CV and
+          must flag unmet requirements rather than invent experience.
+        </p>
+      </div>
+    </div>
+
+    <h3>Feature 02 &mdash; the tracker, in detail</h3>
+    <div class="measure">
+      <p>A status pipeline is the backbone. A realistic set of stages:</p>
+    </div>
+    <div class="pipeline">
+      <span>Saved</span><span>Applied</span><span>Phone screen</span><span>Take-home</span>
+      <span>Interview</span><span>Final round</span><span>Offer</span>
+      <span class="term">Rejected</span><span class="term">Ghosted</span>
+    </div>
+    <div class="measure">
+      <p>
+        Around that: a free-text note and next-action date per role, a per-role event log
+        (&ldquo;recruiter emailed 12 Aug&rdquo;), and a dashboard that turns the log into
+        numbers &mdash; applications per week, reply rate, median days to first response,
+        conversion at each stage. None of this needs AI. The optional AI layer is a
+        <strong>read-only Gmail connection (OAuth)</strong> that scans for recruiter mail
+        and proposes a status change for you to confirm &mdash; legitimate because it is
+        your own inbox and your own consent.
+      </p>
+    </div>
+
+    <h3>Feature 03 &mdash; the cover-letter pipeline</h3>
+    <div class="measure">
+      <ul class="clean">
+        <li>Upload CV &rarr; extract text (pdfplumber / python-docx) &rarr; pull skills and experience with spaCy NER &rarr; chunk and embed.</li>
+        <li>For a target role: embed the job description, then run semantic matching (sentence-transformers) between each JD requirement and the CV evidence.</li>
+        <li>Feed CV chunks + JD + match table to the LLM (Claude API) and produce three artefacts: a <strong>match score with gap analysis</strong>, a <strong>grounded cover-letter draft</strong>, and <strong>resume-tailoring suggestions</strong> plus an ATS keyword-coverage score.</li>
+        <li>Guardrails: every claim in the letter must trace to a CV chunk; unmet requirements are surfaced, not papered over; nothing is ever auto-sent.</li>
+      </ul>
+      <p>This is article idea&nbsp;#7 (AI-based Resume Analyser) turned into a working tool.</p>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section id="data">
+    <div class="sec-head"><span class="sec-num">&sect;03</span><h2>The data-acquisition problem</h2></div>
+    <div class="measure">
+      <p>
+        This is the crux of your question. &ldquo;Get jobs from Seek and LinkedIn via a
+        real API&rdquo; is the one part of the vision that does not map onto something you
+        can just sign up for. Here is the honest landscape.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Source</th><th>Official API</th><th>Fit for keyword search</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Adzuna</strong></td>
+            <td>Yes &mdash; free tier, API key</td>
+            <td>Keyword, location, salary; genuine AU coverage</td>
+            <td><span class="tag tag--ok">Use as default</span></td>
+          </tr>
+          <tr>
+            <td><strong>Jooble</strong></td>
+            <td>Yes &mdash; free key</td>
+            <td>Aggregator; decent AU coverage</td>
+            <td><span class="tag tag--ok">Secondary source</span></td>
+          </tr>
+          <tr>
+            <td><strong>Greenhouse / Lever / Workable</strong></td>
+            <td>Yes &mdash; public, no auth</td>
+            <td>Per-company boards; clean structured JSON</td>
+            <td><span class="tag tag--ok">First-class</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Muse / Arbeitnow / Remotive</strong></td>
+            <td>Yes &mdash; free</td>
+            <td>More remote / global than AU-specific</td>
+            <td><span class="tag tag--ok">Optional</span></td>
+          </tr>
+          <tr>
+            <td><strong>Google Jobs</strong></td>
+            <td>Only via SerpAPI (paid) or Cloud Talent Solution</td>
+            <td>Talent Solution builds <em>your own</em> board, not a query API</td>
+            <td><span class="tag tag--warn">Paid / indirect</span></td>
+          </tr>
+          <tr>
+            <td><strong>Seek</strong></td>
+            <td>Partner-gated; hiring side only</td>
+            <td>No consumer job-search endpoint exists</td>
+            <td><span class="tag tag--block">Capture instead</span></td>
+          </tr>
+          <tr>
+            <td><strong>LinkedIn</strong></td>
+            <td>No job-search API for developers</td>
+            <td>Scraping breaches the User Agreement &amp; is enforced</td>
+            <td><span class="tag tag--block">Capture instead</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Seek, specifically</h3>
+    <div class="measure">
+      <p>
+        The <a href="https://developer.seek.com/" target="_blank" rel="noopener">SEEK
+        Developer API</a> is real but built for the <em>hiring</em> side &mdash; job
+        posting, &ldquo;Apply with SEEK&rdquo;, and ad-performance data &mdash; aimed at
+        recruiters and recruitment-software vendors. Access goes through an integration
+        request form and a partner manager. There is <strong>no endpoint that returns job
+        listings for a keyword search</strong>. Realistic paths for you: an approved
+        partner integration (not attainable for a solo project), a paid third-party scraper
+        (cost, plus it still rests on scraped data), or user-initiated capture (below).
+      </p>
+    </div>
+
+    <h3>LinkedIn, specifically</h3>
+    <div class="measure">
+      <p>
+        There is <strong>no LinkedIn API for searching or extracting job listings</strong>.
+        The Job Posting API exists only for approved distribution partners pushing jobs
+        <em>in</em>, and that partner programme is not accepting new applicants. Automated
+        scraping violates the LinkedIn User Agreement, and LinkedIn enforces it &mdash;
+        auth walls, IP blocking, and litigation (the data provider Proxycurl was shut down
+        after LinkedIn legal action). The <em>hiQ&nbsp;v.&nbsp;LinkedIn</em> case is often
+        cited as &ldquo;scraping public data is legal,&rdquo; but it actually ended with
+        hiQ found to have <strong>breached LinkedIn's terms</strong>: the CFAA does not
+        reach public data, but the contract you accept still binds you.
+      </p>
+    </div>
+
+    <div class="crux">
+      <p class="lbl">The workaround that actually holds up</p>
+      <p>
+        A <strong>Manifest V3 browser extension</strong>. While <em>you</em> are browsing a
+        job on Seek or LinkedIn in your own logged-in session, you click
+        &ldquo;Save to MyJobSearch.&rdquo; A content script reads the visible job
+        description, title, company, and URL and POSTs them to the app. One page at a time,
+        user-initiated, no crawler, no stored credentials, no rate limit to trip. It works
+        identically on Seek, LinkedIn, or any company careers page.
+      </p>
+      <p>
+        This is both the compliance story <em>and</em> a real feature. In an interview,
+        &ldquo;I chose not to scrape LinkedIn and built a user-consent capture flow
+        instead&rdquo; reads as engineering judgement, not a gap.
+      </p>
+    </div>
+
+    <div class="measure">
+      <p>
+        Net design consequence: build ingestion behind a <strong>connector interface</strong>
+        (<span class="mono">search(keywords, location) &rarr; Job[]</span>). Ship Adzuna and
+        a Greenhouse/Lever connector as automated sources; ship the extension as the
+        Seek/LinkedIn path; leave a documented stub where a paid provider could slot in
+        later.
+      </p>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section id="architecture">
+    <div class="sec-head"><span class="sec-num">&sect;04</span><h2>System architecture</h2></div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 780 470" role="img" aria-labelledby="arch-title">
+        <title id="arch-title">Layered architecture: sources feed ingestion, which writes to storage, which serves the AI services and the UI.</title>
+
+        <!-- lane guides -->
+        <line class="di-lane" x1="20" y1="96" x2="760" y2="96"></line>
+        <line class="di-lane" x1="20" y1="190" x2="760" y2="190"></line>
+        <line class="di-lane" x1="20" y1="300" x2="760" y2="300"></line>
+        <line class="di-lane" x1="20" y1="392" x2="760" y2="392"></line>
+
+        <text class="di-lanelabel" x="20" y="30">Sources</text>
+        <text class="di-lanelabel" x="20" y="124">Ingestion</text>
+        <text class="di-lanelabel" x="20" y="218">Storage</text>
+        <text class="di-lanelabel" x="20" y="328">Services</text>
+        <text class="di-lanelabel" x="20" y="420">Surface</text>
+
+        <!-- Sources -->
+        <g>
+          <rect class="di-node" x="20" y="40" width="220" height="46"></rect>
+          <text class="di-title" x="34" y="62">Adzuna / Jooble API</text>
+          <text class="di-sub" x="34" y="78">keyword + location search</text>
+
+          <rect class="di-node" x="280" y="40" width="220" height="46"></rect>
+          <text class="di-title" x="294" y="62">Greenhouse / Lever</text>
+          <text class="di-sub" x="294" y="78">public per-company boards</text>
+
+          <rect class="di-node--accent" x="540" y="40" width="220" height="46"></rect>
+          <text class="di-title" x="554" y="62">Browser capture (MV3)</text>
+          <text class="di-sub" x="554" y="78">Seek / LinkedIn, user-clicked</text>
+        </g>
+
+        <!-- Ingestion -->
+        <rect class="di-node" x="20" y="134" width="740" height="46"></rect>
+        <text class="di-title" x="34" y="156">Connector interface &rarr; normalise &rarr; de-duplicate</text>
+        <text class="di-sub" x="34" y="172">FastAPI service; one Job schema regardless of origin</text>
+
+        <!-- Storage -->
+        <rect class="di-node" x="20" y="234" width="360" height="52"></rect>
+        <text class="di-title" x="34" y="256">Postgres</text>
+        <text class="di-sub" x="34" y="273">jobs · applications · stage events</text>
+
+        <rect class="di-node" x="400" y="234" width="360" height="52"></rect>
+        <text class="di-title" x="414" y="256">Vector store (pgvector)</text>
+        <text class="di-sub" x="414" y="273">CV chunks · JD embeddings</text>
+
+        <!-- Services -->
+        <rect class="di-node" x="20" y="336" width="235" height="46"></rect>
+        <text class="di-title" x="34" y="358">Match engine</text>
+        <text class="di-sub" x="34" y="374">sentence-transformers</text>
+
+        <rect class="di-node--accent" x="272" y="336" width="235" height="46"></rect>
+        <text class="di-title" x="286" y="358">Cover-letter gen</text>
+        <text class="di-sub" x="286" y="374">Claude API · grounded</text>
+
+        <rect class="di-node" x="524" y="336" width="236" height="46"></rect>
+        <text class="di-title" x="538" y="358">Status detector</text>
+        <text class="di-sub" x="538" y="374">Gmail API (read-only)</text>
+
+        <!-- Surface -->
+        <rect class="di-node" x="20" y="410" width="470" height="44"></rect>
+        <text class="di-title" x="34" y="431">UI &mdash; Streamlit &rarr; Next.js / React</text>
+        <text class="di-sub" x="34" y="446">search · tracker board · letter review</text>
+
+        <rect class="di-node" x="510" y="410" width="250" height="44"></rect>
+        <text class="di-title" x="524" y="431">Scheduler</text>
+        <text class="di-sub" x="524" y="446">saved searches · email digest</text>
+
+        <!-- flows -->
+        <path class="di-flow" d="M130 86 L130 134" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M390 86 L390 134" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M650 86 L650 134" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M390 180 L390 234" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M200 286 L137 336" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M400 286 L390 336" marker-end="url(#ar)"></path>
+        <path class="di-flow" d="M255 410 L255 382" marker-end="url(#ar)"></path>
+
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"></path>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="measure">
+      <p>
+        The seam that matters is the <strong>connector interface</strong>: every source,
+        API or capture, produces the same <span class="mono">Job</span> record, so the rest
+        of the system never knows or cares where a listing came from. Everything downstream
+        of storage is standard: an embedding-based matcher, an LLM call with retrieval, and
+        a thin UI.
+      </p>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section id="stack">
+    <div class="sec-head"><span class="sec-num">&sect;05</span><h2>Tech stack</h2></div>
+    <div class="measure">
+      <p>
+        Chosen to line up with the vocabulary in the &ldquo;50 easy AI projects&rdquo;
+        article you're working from &mdash; the last column names the idea each choice
+        echoes.
+      </p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Choice</th><th>Echoes article idea</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Runtime &amp; API</td><td>Python 3.12 + <strong>FastAPI</strong></td><td class="mono">#3, #7, #22</td></tr>
+          <tr><td>Resume &amp; JD parsing</td><td><strong>spaCy</strong> NER + <strong>pdfplumber</strong> + python-docx</td><td class="mono">#7, #45</td></tr>
+          <tr><td>Semantic matching</td><td><strong>sentence-transformers</strong> / Hugging Face</td><td class="mono">#7, #30</td></tr>
+          <tr><td>Generation</td><td><strong>Claude API</strong> (<span class="mono">claude-sonnet-5</span>)</td><td class="mono">#35, #47</td></tr>
+          <tr><td>Retrieval store</td><td>Postgres + <strong>pgvector</strong> (or Chroma)</td><td class="mono">#35, #42</td></tr>
+          <tr><td>Application data</td><td>PostgreSQL + SQLModel</td><td class="mono">&mdash;</td></tr>
+          <tr><td>Orchestration (optional)</td><td>LangChain, kept light</td><td class="mono">#35</td></tr>
+          <tr><td>Scheduling</td><td>APScheduler / cron</td><td class="mono">#36</td></tr>
+          <tr><td>Email</td><td>Gmail API (read) + SendGrid (digests)</td><td class="mono">#36</td></tr>
+          <tr><td>Capture</td><td>TypeScript, Manifest V3 extension</td><td class="mono">&mdash;</td></tr>
+          <tr><td>UI</td><td><strong>Streamlit</strong> first &rarr; Next.js / React later</td><td class="mono">#1, #20 &rarr; #5, #30</td></tr>
+          <tr><td>Evaluation</td><td>pytest + labelled JD/CV fixtures + notebook report</td><td class="mono">&ldquo;How to judge&rdquo;</td></tr>
+          <tr><td>Deploy</td><td>Docker + Fly.io / Render, env-var secrets</td><td class="mono">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="measure">
+      <p>
+        Start on Streamlit &mdash; it gets a demo in front of people in a weekend. Move the
+        UI to Next.js/React only if you want the CV to show front-end range; the FastAPI
+        backend does not change when you do.
+      </p>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section id="plan">
+    <div class="sec-head"><span class="sec-num">&sect;06</span><h2>Build plan</h2></div>
+    <div class="phases">
+      <div class="phase phase--mvp">
+        <span class="ph-tag">Phase 1</span>
+        <h3>MVP</h3>
+        <span class="ph-when">~3&ndash;4 weekends</span>
+        <ul>
+          <li>Adzuna + one Greenhouse/Lever connector behind the connector interface</li>
+          <li>Keyword search &rarr; results saved to Postgres</li>
+          <li>Tracker board with the stage pipeline, notes, next-action date</li>
+          <li>Funnel chart: reply rate, days-to-response, stage conversion</li>
+          <li>CV upload &rarr; parse &rarr; embed</li>
+          <li>&ldquo;Generate cover letter&rdquo;: match score + gap analysis + draft</li>
+          <li>Eval notebook with the first metrics</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <span class="ph-tag">Phase 2</span>
+        <h3>V2</h3>
+        <span class="ph-when">+2&ndash;3 weekends</span>
+        <ul>
+          <li>Manifest V3 capture extension &mdash; the Seek / LinkedIn path</li>
+          <li>Gmail read-only connection &rarr; suggested status changes</li>
+          <li>Scheduled saved searches + weekly email digest</li>
+          <li>Resume-tailoring suggestions + ATS keyword-coverage score</li>
+          <li>Cross-source de-duplication</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <span class="ph-tag">Phase 3</span>
+        <h3>V3 &mdash; ambitious</h3>
+        <span class="ph-when">open-ended</span>
+        <ul>
+          <li>Agentic weekly application-strategy planner (idea #35)</li>
+          <li>Fine-tuned JD section classifier (requirements vs nice-to-haves)</li>
+          <li>Fairness pass on <em>your own</em> funnel: which JD phrasings correlate with rejection</li>
+          <li>Next.js/React UI rebuild</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section id="eval">
+    <div class="sec-head"><span class="sec-num">&sect;07</span><h2>How to prove it works</h2></div>
+    <div class="measure">
+      <p>
+        The article's closing section is right: pick metrics that fit, stress-test with
+        noisy inputs, check across groups, and report cost. Concretely, for this project:
+      </p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>What you're testing</th><th>Metric</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Job&ndash;CV match ranking</td><td class="mono">precision@k, nDCG</td><td>Hand-label ~50 JDs as relevant / not for a fixed CV</td></tr>
+          <tr><td>Resume field extraction</td><td class="mono">field-level F1</td><td>Gold-annotate skills, titles, dates on 20 CVs</td></tr>
+          <tr><td>Cover-letter grounding</td><td class="mono">claim-support rate</td><td>Every sentence must map to a CV chunk; target &gt; 0.95</td></tr>
+          <tr><td>Status detection from email</td><td class="mono">precision / recall</td><td>Per stage; err toward &ldquo;suggest,&rdquo; never auto-apply</td></tr>
+          <tr><td>Robustness</td><td class="mono">&Delta; score on perturbed input</td><td>Scanned PDF, odd layout, truncated JD</td></tr>
+          <tr><td>Efficiency</td><td class="mono">p95 latency, tokens &amp; $ / letter</td><td>Report it; it's a differentiator that most demos skip</td></tr>
+          <tr><td>Fairness (V3)</td><td class="mono">conversion by role / seniority</td><td>Name the failure cases, not just the wins</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section id="limits">
+    <div class="sec-head"><span class="sec-num">&sect;08</span><h2>Limitations, stated plainly</h2></div>
+    <div class="measure">
+      <ul class="clean">
+        <li>
+          <strong>Seek has no consumer API.</strong> Your options are an approved partner
+          integration (recruiter-oriented, not realistic solo), a paid third-party scraper
+          (cost + it's still scraped data), or the browser capture.
+        </li>
+        <li>
+          <strong>LinkedIn has no job API for this use.</strong> Automated scraping
+          breaches the User Agreement and is actively enforced. Use capture or manual
+          paste; do not ship a scraper in a project you put your name on.
+        </li>
+        <li>
+          <strong>Aggregator free tiers</strong> have rate limits and only partial coverage
+          of the AU market &mdash; which Seek dominates. The capture flow is what closes
+          that gap in practice.
+        </li>
+        <li>
+          <strong>LLM output needs a human every time.</strong> Anti-fabrication guardrails
+          reduce risk but don't remove it; treat the match score as advisory and never
+          auto-send a letter.
+        </li>
+        <li>
+          <strong>Gmail parsing is noisy.</strong> Recruiter mail is inconsistent; surface
+          suggestions for confirmation rather than mutating state directly.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section id="cv">
+    <div class="sec-head"><span class="sec-num">&sect;09</span><h2>Putting it on your CV</h2></div>
+    <div class="measure">
+      <ul class="clean">
+        <li>Describe it as an <strong>&ldquo;AI-assisted job-application copilot&rdquo;</strong> &mdash; retrieval-augmented generation, semantic JD&harr;CV matching, NER-based resume parsing, and an evaluation harness with real numbers.</li>
+        <li>Lead the interview story with the <strong>data-sourcing decision</strong>: you assessed the Seek and LinkedIn APIs, found no compliant path for automated search, and built a user-consent capture flow instead. That's the judgement signal.</li>
+        <li>Have three numbers ready: <span class="mono">precision@k</span> on the match ranker, <span class="mono">claim-support rate</span> on generated letters, and <span class="mono">p95 latency + cost per letter</span>.</li>
+        <li>Keep the repo honest: a short &ldquo;Limitations&rdquo; section in the README, mirroring &sect;08, reads as maturity, not weakness.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <h2>Sources</h2>
+    <ul>
+      <li><a href="https://www.getphyllo.com/post/linkedin-api-access-in-2026-partner-program-approval-timeline-alternatives" target="_blank" rel="noopener">LinkedIn API Access in 2026: Tiers, Approval &amp; Alternatives &mdash; Phyllo</a></li>
+      <li><a href="https://clura.ai/blog/linkedin-api" target="_blank" rel="noopener">LinkedIn API: What Exists, What's Restricted, What Developers Use Instead (2026) &mdash; Clura</a></li>
+      <li><a href="https://developer.seek.com/" target="_blank" rel="noopener">SEEK Developer &mdash; API documentation</a></li>
+      <li><a href="https://developer.seek.com/introduction" target="_blank" rel="noopener">SEEK Developer &mdash; Introduction &amp; integration request</a></li>
+    </ul>
+    <p class="disclaimer">
+      Prepared 2026-09-03 as a scoping document for MyJobSearch app. API terms and
+      partner-programme status change &mdash; re-check Seek and LinkedIn developer
+      documentation before committing to an approach. Not legal advice.
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById("themeToggle");
+    var root = document.documentElement;
+    function current() {
+      if (root.hasAttribute("data-theme")) return root.getAttribute("data-theme");
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("mjs-theme", next); } catch (e) {}
+    });
+    try {
+      var saved = localStorage.getItem("mjs-theme");
+      if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+    } catch (e) {}
+  })();
+</script>
